@@ -1,6 +1,6 @@
 # Smoke Blockchain Explorer
 
-Live: https://explorer.smoke.io
+Live: https://explore.smoke.io
 
 ### This is clone of [golos-explorer](https://github.com/GolosChain/golos-explorer) for the Smoke blockchain.
 
