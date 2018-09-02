@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!-- COMMON TAGS -->
+		<meta charset="utf-8">
+		<title>Smoke Block Explorer</title>
+		<!-- Search Engine -->
+		<meta name="description" content="The official block explorer for the Smoke blockchain, by the Smoke.Network team.">
+		<meta name="image" content="/graphics/smoke-explorer.jpg">
+		<!-- Schema.org for Google -->
+		<meta itemprop="name" content="Smoke Block Explorer">
+		<meta itemprop="description" content="The official block explorer for the Smoke blockchain, by the Smoke.Network team.">
+		<meta itemprop="image" content="/graphics/smoke-explorer.jpg">
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary">
+		<meta name="twitter:title" content="Smoke Block Explorer">
+		<meta name="twitter:description" content="The official block explorer for the Smoke blockchain, by the Smoke.Network team.">
+		<meta name="twitter:site" content="@smoke_io">
+		<meta name="twitter:creator" content="@smoke_io">
+		<meta name="twitter:image:src" content="/graphics/smoke-explorer.jpg">
+		<!-- Open Graph general (Facebook, Pinterest & Google+) -->
+		<meta name="og:title" content="Smoke Block Explorer">
+		<meta name="og:description" content="The official block explorer for the Smoke blockchain, by the Smoke.Network team.">
+		<meta name="og:image" content="/graphics/smoke-explorer.jpg">
+		<meta name="og:url" content="https://explorer.smoke.io">
+		<meta name="og:site_name" content="Smoke Blockchain Explorer">
+		<meta name="og:type" content="website">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<link rel="icon" href="graphics/favicon.ico" type="image/x-icon"/>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" crossorigin="anonymous">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.12.0/build/styles/default.min.css">
+		<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+		<link rel="stylesheet" href="custom.css?201804151600" />
+
+	</head>
+	<body>
+		<header>
+			<nav class="navbar navbar-expand-lg navbar-dark bg-custom">
+				<a class="navbar-brand" href="/"><img class="brand" src="graphics/block-explorer-logo.png" alt="smoke logo" /></a>
+				<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+				<div class="collapse navbar-collapse" id="navbarSupportedContent">
+					<form class="form-inline my-2 my-lg-0 col-sm-3" id="search-block">
+						<div class="input-group">
+							<input class="form-control form-control-sm" name="block-number" type="search" placeholder="Block number" aria-label="Block number" required="">
+							<div class="input-group-append">
+								<button class="btn btn-danger btn-sm" id="reset-block" type="button"><span class="icon-cross"></span></button>
+								<button class="btn btn-dark btn-sm" type="submit"><span class="icon-keyboard"></span> Search Block</button>
+							</div>
+						</div>
+					</form>
+					<form class="form-inline my-2 my-lg-0 col-sm-3" id="search-hex">
+						<div class="input-group">
+							<input class="form-control form-control-sm" name="hex-number" type="search" placeholder="HEX number" aria-label="HEX number" required="">
+							<div class="input-group-append">
+								<button class="btn btn-danger btn-sm" id="reset-hex" type="button"><span class="icon-cross"></span></button>
+								<button class="btn btn-dark btn-sm" type="submit"><span class="icon-barcode"></span> Search HEX</button>
+							</div>
+						</div>
+					</form>
+					<form class="form-inline my-2 my-lg-0 col-sm-3" id="search-account">
+						<div class="input-group">
+							<input class="form-control form-control-sm" name="account-username" type="search" placeholder="Account username" aria-label="Account username" required="">
+							<div class="input-group-append">
+								<button class="btn btn-danger btn-sm" id="reset-account" type="button"><span class="icon-cross"></span></button>
+								<button class="btn btn-dark btn-sm" type="submit"><span class="icon-user"></span> Search Account</button>
+							</div>
+						</div>
+					</form>
+					<form class="form-inline my-2 my-lg-0 ml-auto hidden" id="node-address">
+						<div class="input-group input-group-sm ">
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="blockchain-version">...</span>
+							</div>
+							<input class="form-control form-control-sm" name="node-address" type="search" placeholder="wss://testnet.smoke.io/wsss" aria-label="wss://testnet.smoke.io/wss" value="wss://testnet.smoke.io/wss" required="">
+							<div class="input-group-append ">
+								<button class="btn btn-warning btn-sm" id="reset-node-address" type="button"><span class="icon-spinner11"></span></button>
+								<button class="btn btn-dark btn-sm" type="submit"><span class="icon-database"></span> Change</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</nav>
+		</header>
+		<article>
+			<main role="main" class="container-fluid">
+				<div class="row" id="main-page">
+					<div class="col-md-12 info">
+						CURRENTLY EXPLORING SMOKE TESTNET V 0.0.3 | PLEASE READ THE <a href="https://testnet.smoke.io/">LATEST ANNOUNCEMENT</a>
+					</div>
+					<div class="col-md-7 col-sm-12">
+						<div id="recent-blocks-info">
+							<div class="row">
+								<div class="col">
+									<h5>Recent Blockchain Activity</h5>
+								</div>
+								<div class="col">
+									<button class="btn btn-secondary btn-sm float-right" id="change-work-real-time" type="button"><span class="icon-pause2"></span> Pause monitoring</button>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col">
+									Displaying most recent irreversible blocks.
+								</div>
+								<div class="col" id="auto-clear">
+									<button class="btn btn-light btn-sm float-right" id="clear-real-time" type="button"><span class="icon-bin"></span> Clear table</button>
+									<div class="col-sm-3 float-right">
+										<input type="number" class="form-control form-control-sm" id="auto-clear-real-time-after" value="50" min="1">
+									</div>
+									<label for="auto-clear-real-time-after" class="float-right">Auto-clear old blocks after:</label>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col">
+									<h5>Current Height <span class="badge badge-primary" id="head-block-number">...</span></h5>
+								</div>
+								<div class="col">
+									<h5 class="float-right">Reversable blocks awaiting concensus <span class="badge badge-warning" id="revers-blocks-count">...</span></h5>
+								</div>
+							</div>
+						</div>
+						<div class="table-responsive">
+							<table class="table table-bordered table-hover table-sm" id="recent-blocks">
+								<thead>
+									<tr class="table-primary">
+										<th scope="col-sm-2">Height</th>
+										<th scope="col-sm-2">Time</th>
+										<th scope="col-sm-2">Witness</th>
+										<th scope="col-sm-2">Transactions</th>
+										<th scope="col-sm-2">Operations</th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div class="col-md-5 col-sm-12">
+						<div class="table-responsive">
+							<table class="table table-bordered table-hover table-sm table-striped" id="chain-properties">
+								<thead>
+									<tr class="table-primary">
+										<th scope="col" colspan="2">Consensus State</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr><td class="table-active">Account Creation Fee</td><td><b data-prop="account_creation_fee">...</b></td></tr>
+									<tr><td class="table-active">Maximum Block Size</td><td><b data-prop="maximum_block_size">...</b></td></tr>
+									<!-- <tr><td class="table-active">SBD Interest Rate</td><td><b data-prop="sbd_interest_rate">...</b></td></tr> -->
+								</tbody>
+							</table>
+						</div>
+						<div class="table-responsive">
+							<table class="table table-bordered table-hover table-sm table-striped" id="global-properties">
+								<thead>
+									<tr class="table-primary">
+										<th scope="col" colspan="2">Global Properties</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr><td class="table-active">Time</td><td><b data-prop="time">...</b></td></tr>
+									<tr><td class="table-active">Current Witness</td><td><b data-prop="current_witness">...</b></td></tr>
+									<tr><td class="table-active">Current Supply</td><td><b data-prop="current_supply">...</b></td></tr>
+									<tr><td class="table-active">Total Vesting Fund</td><td><b data-prop="total_vesting_fund_steem">...</b></td></tr>
+									<tr><td class="table-active">Total Vesting Shares</td><td><b data-prop="total_vesting_shares">...</b></td></tr>
+									<tr><td class="table-active">Total Reward Fund</td><td><b data-prop="total_reward_fund_steem">...</b></td></tr>
+									<tr><td class="table-active">Total Reward Shares2</td><td><b data-prop="total_reward_shares2">...</b></td></tr>
+									<tr><td class="table-active">Maximum Block Size</td><td><b data-prop="maximum_block_size">...</b></td></tr>
+									<tr><td class="table-active">current Aslot</td><td><b data-prop="current_aslot">...</b></td></tr>
+									<tr><td class="table-active">Participation Count</td><td><b data-prop="participation_count">...</b></td></tr>
+									<tr><td class="table-active">Last Irreversible Block Num</td><td><b data-prop="last_irreversible_block_num">...</b></td></tr>
+									<tr><td class="table-active">Current Reserve Ratio</td><td><b data-prop="current_reserve_ratio">...</b></td></tr>
+									<tr><td class="table-active">Average Block Size</td><td><b data-prop="average_block_size">...</b></td></tr>
+									<tr><td class="table-active">Max Virtual Bandwidth</td><td><b data-prop="max_virtual_bandwidth">...</b></td></tr>
+									<tr><td class="table-active">Head Block ID</td><td><b data-prop="head_block_id">...</b></td></tr>
+									<tr><td class="table-active">Recent Slots Filled</td><td><b data-prop="recent_slots_filled">...</b></td></tr>
+									<tr><td class="table-active">Vote Regeneration Per Day</td><td><b data-prop="vote_regeneration_per_day">...</b></td></tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col">
+						<div id="about-block-page">
+							<h5>Height <span class="badge badge-info" id="about-block-height">...</span></h5>
+							<h5>Time <span class="badge badge-info" id="about-block-time">...</span></h5>
+							<h5>Witness <span class="badge badge-info" id="about-block-witness">...</span></h5>
+							<h5>Transactions <span class="badge badge-info" id="about-block-transactions">...</span></h5>
+							<h5>Operations <span class="badge badge-info" id="about-block-operations">...</span></h5>
+							<table class="table table-bordered table-hover table-sm" id="about-block">
+								<tbody>
+								</tbody>
+							</table>
+							<ul class="nav nav-tabs" id="myTab" role="tablist">
+								<li class="nav-item">
+									<a class="nav-link active" id="operations-tab" data-toggle="tab" href="#operations" role="tab" aria-controls="operations" aria-selected="true">Operations</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" id="transactions-tab" data-toggle="tab" href="#transactions" role="tab" aria-controls="transactions" aria-selected="true">Transactions</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" id="json-tab" data-toggle="tab" href="#json" href="#json" role="tab" aria-controls="json" aria-selected="false">JSON</a>
+								</li>
+							</ul>
+							<div class="tab-content" id="myTabContent">
+								<div class="tab-pane fade show active" id="operations" role="tabpanel" aria-labelledby="operations-tab">
+									<table class="table table-bordered table-hover table-sm" id="about-block-operations-table">
+										<tbody>
+										</tbody>
+									</table>
+								</div>
+								<div class="tab-pane fade" id="transactions" role="tabpanel" aria-labelledby="transactions-tab">
+									<table class="table table-bordered table-hover table-sm" id="about-block-transactions-table">
+										<tbody>
+										</tbody>
+									</table>
+								</div>
+								<div class="tab-pane fade" id="json" role="tabpanel" aria-labelledby="json-tab">
+									<pre><code class="json" id="about-block-code"></code></pre>
+								</div>
+							</div>
+						</div>
+						<div id="about-account-page">
+							<form class="form-inline">
+								<h5>
+									Total <span class="badge badge-info" id="about-account-all-count">...</span> transactions, showing <span class="badge badge-info" id="about-account-filtered-count">...</span> transactions,
+									<select class="form-control form-control-sm" id="about-account-filter">
+										<option value="" selected="">All</option>
+										<option value="account_create">account_create</option>
+										<option value="account_update">account_update</option>
+										<option value="account_witness_proxy">account_witness_proxy</option>
+										<option value="account_witness_vote">account_witness_vote</option>
+										<option value="author_reward">author_reward</option>
+										<option value="cancel_transfer_from_savings">cancel_transfer_from_savings</option>
+										<option value="change_recovery_accounts">change_recovery_accounts</option>
+										<option value="comment">comment</option>
+										<option value="comment_benefactor_reward">comment_benefactor_reward</option>
+										<option value="comment_options">comment_options</option>
+										<option value="convert">convert</option>
+										<option value="custom">custom</option>
+										<option value="custom_json">custom_json</option>
+										<option value="curation_reward">curation_reward</option>
+										<option value="delete_comment">delete_comment</option>
+										<option value="escrow_approve">escrow_approve</option>
+										<option value="escrow_dispute">escrow_dispute</option>
+										<option value="escrow_release">escrow_release</option>
+										<option value="escrow_transfer">escrow_transfer</option>
+										<option value="feed_publish">feed_publish</option>
+										<option value="fill_convert_request">fill_convert_request</option>
+										<option value="fill_order">fill_order</option>
+										<option value="fill_transfer_from_saving">fill_transfer_from_saving</option>
+										<option value="fill_vesting_withdraw">fill_vesting_withdraw</option>
+										<option value="follow">follow</option>
+										<option value="interest">interest</option>
+										<option value="limit_order_cancel">limit_order_cancel</option>
+										<option value="limit_order_create">limit_order_create</option>
+										<option value="limit_order_create2">limit_order_create2</option>
+										<option value="liquidity_reward">liquidity_reward</option>
+										<option value="pow2">pow2</option>
+										<option value="reblog">reblog</option>
+										<option value="recover_account">recover_account</option>
+										<option value="recover_account_recovery">recover_account_recovery</option>
+										<option value="set_withdraw_vesting_route">set_withdraw_vesting_route</option>
+										<option value="shutdown_witness">shutdown_witness</option>
+										<option value="transfer">transfer</option>
+										<option value="transfer_from_savings">transfer_from_savings</option>
+										<option value="transfer_to_savings">transfer_to_savings</option>
+										<option value="transfer_to_vesting">transfer_to_vesting</option>
+										<option value="vesting_deposit">vesting_deposit</option>
+										<option value="vote">vote</option>
+										<option value="withdraw_vesting">withdraw_vesting</option>
+										<option value="withdraw_vesting_route">withdraw_vesting_route</option>
+										<option value="witness_update">witness_update</option>
+										<option value="witness_vote">witness_vote</option>
+									</select>
+									filtered from <span class="badge badge-info" id="about-account-count">...</span> transactions
+								</h5>
+							</form>
+							<table class="table table-bordered table-hover table-sm" id="about-account">
+								<thead>
+									<tr class="table-primary">
+										<th scope="col">Time</th>
+										<th scope="col">Transaction ID</th>
+										<th scope="col">From</th>
+										<th scope="col">To</th>
+										<th scope="col">Amount</th>
+										<th scope="col">Memo</th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+							</table>
+							<nav aria-label="Page navigation" id="abount-account-page-nav">
+								<ul class="pagination">
+									<li class="page-item">
+										<a class="page-link" href="#" aria-label="Previous" id="about-account-page-prev">
+											<span aria-hidden="true">&laquo;</span>
+											<span class="sr-only">Previous</span>
+										</a>
+									</li>
+									<li class="page-item active"><a class="page-link" href="#">1</a></li>
+									<li class="page-item"><a class="page-link" href="#">2</a></li>
+									<li class="page-item"><a class="page-link" href="#">3</a></li>
+									<li class="page-item">
+										<a class="page-link" href="#" aria-label="Next" id="about-account-page-next">
+											<span aria-hidden="true">&raquo;</span>
+											<span class="sr-only">Next</span>
+										</a>
+									</li>
+								</ul>
+							</nav>
+						</div>
+					</div>
+				</div>
+				<br>
+			</main>
+		</article>
+		<footer class="footer">
+			<div class="container-fluid">
+				<span class="text-muted">Smoke Block Explorer | <a href="https://smoke.network"> Smoke.Network </a>2018</span>
+			</div>
+		</footer>
+		<div class="modal" id="modal-about-block" tabindex="-1" role="dialog">
+			<div class="modal-dialog modal-full" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">About block</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<ul class="nav nav-tabs" id="modal-myTab" role="tablist">
+							<li class="nav-item">
+								<a class="nav-link active" id="modal-operations-tab" data-toggle="tab" href="#modal-operations" role="tab" aria-controls="modal-operations" aria-selected="true">Operations</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" id="modal-transactions-tab" data-toggle="tab" href="#modal-transactions" role="tab" aria-controls="modal-transactions" aria-selected="true">Transactions</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" id="modal-json-tab" data-toggle="tab" href="#modal-json" href="#modal-json" role="tab" aria-controls="modal-json" aria-selected="false">JSON</a>
+							</li>
+						</ul>
+						<div class="tab-content" id="modal-myTabContent">
+							<div class="tab-pane fade show active" id="modal-operations" role="tabpanel" aria-labelledby="modal-operations-tab">
+								<table class="table table-bordered table-hover table-sm" id="modal-about-block-operations-table">
+									<tbody>
+									</tbody>
+								</table>
+							</div>
+							<div class="tab-pane fade" id="modal-transactions" role="tabpanel" aria-labelledby="modal-transactions-tab">
+								<table class="table table-bordered table-hover table-sm" id="modal-about-block-transactions-table">
+									<tbody>
+									</tbody>
+								</table>
+							</div>
+							<div class="tab-pane fade" id="modal-json" role="tabpanel" aria-labelledby="modal-json-tab">
+								<pre><code class="json" id="modal-about-block-code"></code></pre>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="lding">
+			<div class="lds-css ng-scope">
+				<div class="lds-cube">
+					<div></div>
+					<div></div>
+					<div></div>
+					<div></div>
+				</div>
+			</div>
+		</div>
+		<script src="https://cdn.jsdelivr.net/npm/golos-js@0.6.2/dist/golos.min.js"></script>
+		<script src="https://thednp.github.io/bootstrap.native/dist/bootstrap-native-v4.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.13.1/dist/sweetalert2.all.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.12.0/build/highlight.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.7.5/beautify.min.js"></script>
+		<script src="app.js?201804151600"></script>
+	</body>
+</html>
