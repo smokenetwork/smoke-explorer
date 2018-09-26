@@ -1,6 +1,7 @@
 body {
   margin-bottom: 60px;
   font-family: 'Montserrat', sans-serif !important;
+  color: #5f5f5f;
 }
 html {
   position: relative;
@@ -9,11 +10,15 @@ html {
 }
 
 a {
-  color: #09c534;
+  color: #5db536;
 }
 
 a:hover {
   color: #0da931
+}
+
+b {
+  color: #424242;
 }
 
 @font-face {
@@ -202,21 +207,30 @@ footer {
 }
 
 .bg-custom {
-  background: #09c534;
-    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
+  background: white;
+  border-bottom: 1px solid #eee;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .hidden {
   display:none;
 }
 
-.table-primary>th {
-    background-color: #4edc6e;
+.table {
+  margin-bottom: 0.1px;
 }
 
-.table-responsive>.table-bordered {
+.table-primary, .table-primary>td, .table-primary>th {
+    background-color: #04d500;
+    color: white;
+}
+
+.table-responsive {
     border: 0;
     box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
 }
 
 .table-secondary, .table-secondary>td, .table-secondary>th {
@@ -235,18 +249,27 @@ footer {
     background-color: rgba(0,0,0,.015);
 }
 
+.table-sm td, .table-sm th {
+    padding: .5rem;
+}
+
 .brand {
   max-width: 200px
 }
 
-@media (min-width: 576px) {
-    .form-inline .input-group {
-        width: max-content;
-    }
+.navbar-toggler {
+  background-color: #343a40;
+}
 
-    .brand {
-      max-width: 300px
-    }
+@media (min-width: 992px) {
+.navbar-expand-lg .navbar-collapse {
+    display: -webkit-box!important;
+    display: -ms-flexbox!important;
+    display: flex!important;
+    -ms-flex-preferred-size: auto;
+    flex-basis: auto;
+    flex-direction: row-reverse;
+}
 }
 
 .info {
@@ -259,8 +282,23 @@ footer {
 
 .row {
   margin-bottom: 5px;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .col {
   margin-top: 7px;
+}
+
+@media (max-width: 766px) {
+  .advert-desktop {
+    display:none;
+  }
+}
+@media (min-width: 768px) {
+    .advert-desktop {
+      max-width: 300px;
+      margin: auto;
+  }
 }

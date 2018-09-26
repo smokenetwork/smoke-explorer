@@ -36,7 +36,7 @@
 	<body>
 		<header>
 			<nav class="navbar navbar-expand-lg navbar-dark bg-custom">
-				<a class="navbar-brand" href="/"><img class="brand" src="graphics/block-explorer-logo.png" alt="smoke logo" /></a>
+				<a class="navbar-brand" href="/"><img class="brand" src="graphics/smoke_user.png" alt="smoke logo" /></a>
 				<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 					<span class="navbar-toggler-icon"></span>
 				</button>
@@ -73,7 +73,7 @@
 							<div class="input-group-prepend">
 								<span class="input-group-text" id="blockchain-version">...</span>
 							</div>
-							<input class="form-control form-control-sm" name="node-address" type="search" placeholder="wss://testnet.smoke.io/wsss" aria-label="wss://testnet.smoke.io/wss" value="wss://testnet.smoke.io/wss" required="">
+							<input class="form-control form-control-sm" name="node-address" type="search" placeholder="ws://rpc.smoke.io/" aria-label="wss://rpc.smoke.io/" value="wss://rpc.smoke.io/" required="">
 							<div class="input-group-append ">
 								<button class="btn btn-warning btn-sm" id="reset-node-address" type="button"><span class="icon-spinner11"></span></button>
 								<button class="btn btn-dark btn-sm" type="submit"><span class="icon-database"></span> Change</button>
@@ -85,10 +85,9 @@
 		</header>
 		<article>
 			<main role="main" class="container-fluid">
+
+				<br />
 				<div class="row" id="main-page">
-					<div class="col-md-12 info">
-						CURRENTLY EXPLORING SMOKE TESTNET V 0.0.3 | PLEASE READ THE <a href="https://testnet.smoke.io/">LATEST ANNOUNCEMENT</a>
-					</div>
 					<div class="col-md-7 col-sm-12">
 						<div id="recent-blocks-info">
 							<div class="row">
@@ -135,8 +134,18 @@
 								</tbody>
 							</table>
 						</div>
+						<br />
 					</div>
+
 					<div class="col-md-5 col-sm-12">
+					<!--	<div class="table-responsive advert-desktop">
+								<script type="text/javascript">if (!window.AdButler){(function(){var s = document.createElement("script"); s.async = true; s.type = "text/javascript"; s.src = 'https://servedbyadbutler.com/app.js'; var n = document.getElementsByTagName("script")[0]; n.parentNode.insertBefore(s, n);}());}</script> <script type="text/javascript"> var AdButler = AdButler || {}; AdButler.ads = AdButler.ads || []; var abkw = window.abkw || ''; var plc327896 = window.plc327896 || 0; document.write('<'+'div id="placement_327896_'+plc327896+'"></'+'div>'); AdButler.ads.push({handler: function(opt){ AdButler.register(170048, 327896, [300,250], 'placement_327896_'+opt.place, opt); }, opt: { place: plc327896++, keywords: abkw, domain: 'servedbyadbutler.com', click: 'CLICK_MACRO_PLACEHOLDER' }}); </script>
+						</div>
+						<br /> -->
+						<div class="table-responsive">
+							<script type="text/javascript" src="https://files.coinmarketcap.com/static/widget/currency.js"></script><div class="coinmarketcap-currency-widget" data-currencyid="1898" data-base="USD" data-secondary="BTC" data-ticker="false" data-rank="false" data-marketcap="true" data-volume="false" data-stats="USD" data-statsticker="false"></div>
+						</div>
+						<br/>
 						<div class="table-responsive">
 							<table class="table table-bordered table-hover table-sm table-striped" id="chain-properties">
 								<thead>
@@ -145,12 +154,15 @@
 									</tr>
 								</thead>
 								<tbody>
+									<tr><td class="table-active">Currently Exploring</td><td><b>Mainnet V0.0.5</b></td></tr>
 									<tr><td class="table-active">Account Creation Fee</td><td><b data-prop="account_creation_fee">...</b></td></tr>
 									<tr><td class="table-active">Maximum Block Size</td><td><b data-prop="maximum_block_size">...</b></td></tr>
+									<tr><td class="table-active">Chain ID</td><td><b>1ce08345e61cd3bf91673a47fc507e7ed01550dab841fd9cdb0ab66ef576aaf0</b></td></tr>
 									<!-- <tr><td class="table-active">SBD Interest Rate</td><td><b data-prop="sbd_interest_rate">...</b></td></tr> -->
 								</tbody>
 							</table>
 						</div>
+						<br />
 						<div class="table-responsive">
 							<table class="table table-bordered table-hover table-sm table-striped" id="global-properties">
 								<thead>
@@ -164,8 +176,6 @@
 									<tr><td class="table-active">Current Supply</td><td><b data-prop="current_supply">...</b></td></tr>
 									<tr><td class="table-active">Total Vesting Fund</td><td><b data-prop="total_vesting_fund_steem">...</b></td></tr>
 									<tr><td class="table-active">Total Vesting Shares</td><td><b data-prop="total_vesting_shares">...</b></td></tr>
-									<tr><td class="table-active">Total Reward Fund</td><td><b data-prop="total_reward_fund_steem">...</b></td></tr>
-									<tr><td class="table-active">Total Reward Shares2</td><td><b data-prop="total_reward_shares2">...</b></td></tr>
 									<tr><td class="table-active">Maximum Block Size</td><td><b data-prop="maximum_block_size">...</b></td></tr>
 									<tr><td class="table-active">current Aslot</td><td><b data-prop="current_aslot">...</b></td></tr>
 									<tr><td class="table-active">Participation Count</td><td><b data-prop="participation_count">...</b></td></tr>
@@ -175,7 +185,6 @@
 									<tr><td class="table-active">Max Virtual Bandwidth</td><td><b data-prop="max_virtual_bandwidth">...</b></td></tr>
 									<tr><td class="table-active">Head Block ID</td><td><b data-prop="head_block_id">...</b></td></tr>
 									<tr><td class="table-active">Recent Slots Filled</td><td><b data-prop="recent_slots_filled">...</b></td></tr>
-									<tr><td class="table-active">Vote Regeneration Per Day</td><td><b data-prop="vote_regeneration_per_day">...</b></td></tr>
 								</tbody>
 							</table>
 						</div>
@@ -319,7 +328,7 @@
 		</article>
 		<footer class="footer">
 			<div class="container-fluid">
-				<span class="text-muted">Smoke Block Explorer | <a href="https://smoke.network"> Smoke.Network </a>2018</span>
+				<span class="text-muted">Smoke Block Explorer | <a href="https://smoke.io"> Smoke </a>2018</span>
 			</div>
 		</footer>
 		<div class="modal" id="modal-about-block" tabindex="-1" role="dialog">
