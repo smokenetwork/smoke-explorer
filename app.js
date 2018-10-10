@@ -79,73 +79,92 @@ document.getElementById('clear-real-time').addEventListener('click', function() 
 	swal({title: 'Table real-time blocks cleared!', type: 'success', showConfirmButton: false, position: 'top-right', toast: true, timer: 3000});
 });
 
+let __last_block = 0;
+let __current_block = 0;
 
-let request_global_props_counter = 0;
+sleep = (ms) => { return new Promise(resolve => setTimeout(resolve, ms)); };
 
-steem.api.streamBlockNumber('head', function(err, lastBlock) {
-	if ( ! err) {
-		steem.api.getBlock(lastBlock, function(err, block) {
-			if (block && workRealTime) {
-				let operations = {};
-				let operationsCount = 0;
-				block.transactions.forEach(function(transaction) {
-					transaction.operations.forEach(function(operation) {
-						if ( ! operations[operation[0]]) operations[operation[0]] = 0;
-						operations[operation[0]]++;
-						operationsCount++;
-					});
-				});
-				let operationsStr = '';
-				for (let key in operations) {
-					operationsStr += `<a class="btn btn-outline-info btn-sm" href="#operations/${lastBlock}/${key}">${key} <span class="badge badge-info">${operations[key]}</span></a> `;
-				}
-				let $newRow = $recentBlocksTableTbody.insertRow(0);
-				$newRow.className = 'table-new';
-				$newRow.innerHTML = `<tr>
-										<td><a href="#block/${lastBlock}">${lastBlock}</a></td>
-										<td>${block.timestamp}</td>
-										<td><a href="#account/${block.witness}">${block.witness}</a></td>
-										<td>${block.transactions.length}</td>
-										<td>${operationsCount}</td>
-									</tr>`;
-				setTimeout(function() {
-					$newRow.className = 'table-success';
-				}, 500);
-				setTimeout(function() {
-					$newRow.className = 'table-secondary';
-				}, 3000);
-				let $newSubRow = $recentBlocksTableTbody.insertRow(1);
-				$newSubRow.className = 'table-new';
-				$newSubRow.innerHTML = `<tr>${operationsStr ? `<td colspan="5">${operationsStr}</td>` : ``}</tr>`;
-				setTimeout(function() {
-					$newSubRow.className = 'table-success';
-				}, 500);
-				setTimeout(function() {
-					$newSubRow.className = '';
-				}, 3000);
-				autoClearRealTime();
-			}
-			else if (err) console.error(err);
-		});
-	}
+update_block = async (lastBlock) => {
+  const block = await steem.api.getBlockAsync(lastBlock);
 
-  if (request_global_props_counter % 5 === 0) {
-    steem.api.getDynamicGlobalProperties(function(err, properties) {
-      if ( ! err) {
-        for (let key in properties) {
-          let prop = $globalPropertiesTableTbody.querySelector('b[data-prop="' + key + '"]');
-          if (prop) prop.innerHTML = properties[key];
-        }
-        let reverseBlockCount = properties.head_block_number - properties.last_irreversible_block_num;
-        $headBlockNumber.innerHTML = properties.head_block_number;
-        $reverseBlocksCount.innerHTML = reverseBlockCount;
-      }
+  if (block && workRealTime) {
+    let operations = {};
+    let operationsCount = 0;
+    block.transactions.forEach(function(transaction) {
+      transaction.operations.forEach(function(operation) {
+        if ( ! operations[operation[0]]) operations[operation[0]] = 0;
+        operations[operation[0]]++;
+        operationsCount++;
+      });
     });
+    let operationsStr = '';
+    for (let key in operations) {
+      operationsStr += `<a class="btn btn-outline-info btn-sm" href="#operations/${lastBlock}/${key}">${key} <span class="badge badge-info">${operations[key]}</span></a> `;
+    }
+    let $newRow = $recentBlocksTableTbody.insertRow(0);
+    $newRow.className = 'table-new';
+    $newRow.innerHTML = `<tr>
+                <td><a href="#block/${lastBlock}">${lastBlock}</a></td>
+                <td>${block.timestamp}</td>
+                <td><a href="#account/${block.witness}">${block.witness}</a></td>
+                <td>${block.transactions.length}</td>
+                <td>${operationsCount}</td>
+              </tr>`;
+    $newRow.className = 'table-success';
+    $newRow.className = 'table-secondary';
+    let $newSubRow = $recentBlocksTableTbody.insertRow(1);
+    $newSubRow.className = 'table-new';
+    $newSubRow.innerHTML = `<tr>${operationsStr ? `<td colspan="5">${operationsStr}</td>` : ``}</tr>`;
+    $newSubRow.className = 'table-success';
+    $newSubRow.className = '';
+    autoClearRealTime();
   }
+  // else if (err) console.error(err);
+};
 
-  request_global_props_counter++;
+update_gprops = async () => {
+  const properties = await steem.api.getDynamicGlobalPropertiesAsync();
+  for (let key in properties) {
+    let prop = $globalPropertiesTableTbody.querySelector('b[data-prop="' + key + '"]');
+    if (prop) prop.innerHTML = properties[key];
+  }
+  let reverseBlockCount = properties.head_block_number - properties.last_irreversible_block_num;
+  $headBlockNumber.innerHTML = properties.head_block_number;
+  $reverseBlocksCount.innerHTML = reverseBlockCount;
 
-}, 6000);
+  //////////
+  __last_block = properties.head_block_number;
+};
+
+(async function init() {
+  console.log("init");
+
+  while (true) { // big loop
+    try {
+      if (__last_block <= 0) {
+        await update_gprops();
+      }
+
+      if (__current_block <= 0) {
+        __current_block = __last_block;
+      }
+
+      while (__current_block <= __last_block) {
+        await update_block(__current_block);
+        __current_block ++;
+
+        await sleep(1000);
+      }
+
+      await update_gprops();
+    } catch (e) {
+      console.log(e);
+    } finally {
+      await sleep(10000);
+    }
+  }
+})();
+
 
 if (localStorage && localStorage.clearAfterBlocksVal) $autoClearRealTimeAfter.value = localStorage.clearAfterBlocksVal;
 
