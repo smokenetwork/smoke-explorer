@@ -27,7 +27,6 @@ let $aboutBlockOperations = document.getElementById('about-block-operations');
 let $loader = document.getElementsByClassName('lding')[0];
 let $recentBlocksInfo = document.getElementById('recent-blocks-info');
 let $resetHexBtn = document.getElementById('reset-hex');
-let $resetNodeAddress = document.getElementById('reset-node-address');
 let $globalPropertiesTableTbody = document.getElementById('global-properties').getElementsByTagName('tbody')[0];
 let $chainPropertiesTableTbody = document.getElementById('chain-properties').getElementsByTagName('tbody')[0];
 let $aboutAccountAllCount = document.getElementById('about-account-all-count');
@@ -43,49 +42,23 @@ let $modalAboutBlockTransactionsTableTbody = document.getElementById('modal-abou
 let $modalAboutBlockCode = document.getElementById('modal-about-block-code');
 let $aboutAccountPagePrev = document.getElementById('about-account-page-prev');
 let $aboutAccountPageNext = document.getElementById('about-account-page-next');
-let $nodeAddress = document.getElementById('node-address');
-let $nodeAddressInput = $nodeAddress.querySelector('.form-control[name="node-address"]');
-let defaultWebsocket = 'wss://ws.golos.io';
 
-let getBlockchainVersion = function() {
-	golos.api.getConfig(function(err, result) {
-		console.log(result.STEEMIT_BLOCKCHAIN_VERSION);
-		if ( ! err) document.getElementById('blockchain-version').innerHTML = result.STEEMIT_BLOCKCHAIN_VERSION;
-	});
-};
+steem.api.setOptions({url: 'https://rpc.smoke.io'});
+steem.config.set('address_prefix', 'SMK');
+steem.config.set('chain_id', '1ce08345e61cd3bf91673a47fc507e7ed01550dab841fd9cdb0ab66ef576aaf0');
 
 let getChainProperties = function() {
-	golos.api.getChainProperties(function(err, properties) {
-		if ( ! err) {
-			for (let key in properties) {
-				let prop = $chainPropertiesTableTbody.querySelector('b[data-prop="' + key + '"]');
-				if (prop) prop.innerHTML = properties[key];
-			}
-		}
-	});
+  steem.api.getChainProperties(function(err, properties) {
+    if ( ! err) {
+      for (let key in properties) {
+        let prop = $chainPropertiesTableTbody.querySelector('b[data-prop="' + key + '"]');
+        if (prop) prop.innerHTML = properties[key];
+      }
+    }
+  });
 };
 
-$nodeAddress.addEventListener('submit', function(e) {
-	e.preventDefault();
-	localStorage.nodeAddress = $nodeAddressInput.value;
-	window.location.reload();
-});
-
-if (localStorage && localStorage.nodeAddress) $nodeAddressInput.value = localStorage.nodeAddress;
-document.getElementById('blockchain-version').innerHTML = '...';
-let nodeAddress = $nodeAddressInput.value;
-golos.config.set('websocket', nodeAddress);
-if (nodeAddress != defaultWebsocket) {
-	$resetNodeAddress.style.display = 'block';
-}
-getBlockchainVersion();
 getChainProperties();
-
-$resetNodeAddress.addEventListener('click', function() {
-	document.getElementById('node-address').querySelector('.form-control[name="node-address"]').value = defaultWebsocket;
-	document.getElementById('node-address').dispatchEvent(new CustomEvent('submit'));
-	$resetNodeAddress.style.display = 'none';
-});
 
 let workRealTime = true;
 document.getElementById('change-work-real-time').addEventListener('click', function() {
@@ -106,66 +79,92 @@ document.getElementById('clear-real-time').addEventListener('click', function() 
 	swal({title: 'Table real-time blocks cleared!', type: 'success', showConfirmButton: false, position: 'top-right', toast: true, timer: 3000});
 });
 
-golos.api.streamBlockNumber(function(err, lastBlock) {
-	if ( ! err) {
-		golos.api.getBlock(lastBlock, function(err, block) {
-			if (block && workRealTime) {
-				let operations = {};
-				let operationsCount = 0;
-				block.transactions.forEach(function(transaction) {
-					transaction.operations.forEach(function(operation) {
-						if ( ! operations[operation[0]]) operations[operation[0]] = 0;
-						operations[operation[0]]++;
-						operationsCount++;
-					});
-				});
-				let operationsStr = '';
-				for (let key in operations) {
-					operationsStr += `<a class="btn btn-outline-info btn-sm" href="#operations/${lastBlock}/${key}">${key} <span class="badge badge-info">${operations[key]}</span></a> `;
-				}
-				let $newRow = $recentBlocksTableTbody.insertRow(0);
-				$newRow.className = 'table-new';
-				$newRow.innerHTML = `<tr>
-										<td><a href="#block/${lastBlock}">${lastBlock}</a></td>
-										<td>${block.timestamp}</td>
-										<td><a href="#account/${block.witness}">${block.witness}</a></td>
-										<td>${block.transactions.length}</td>
-										<td>${operationsCount}</td>
-									</tr>`;
-				setTimeout(function() {
-					$newRow.className = 'table-success';
-				}, 500);
-				setTimeout(function() {
-					$newRow.className = 'table-secondary';
-				}, 3000);
-				let $newSubRow = $recentBlocksTableTbody.insertRow(1);
-				$newSubRow.className = 'table-new';
-				$newSubRow.innerHTML = `<tr>${operationsStr ? `<td colspan="5">${operationsStr}</td>` : ``}</tr>`;
-				setTimeout(function() {
-					$newSubRow.className = 'table-success';
-				}, 500);
-				setTimeout(function() {
-					$newSubRow.className = '';
-				}, 3000);
-				autoClearRealTime();
-			}
-			else if (err) console.error(err);
-		});
-	}
-	
-	golos.api.getDynamicGlobalProperties(function(err, properties) {
-		if ( ! err) {
-			for (let key in properties) {
-				let prop = $globalPropertiesTableTbody.querySelector('b[data-prop="' + key + '"]');
-				if (prop) prop.innerHTML = properties[key];
-			}
-			let reverseBlockCount = properties.head_block_number - properties.last_irreversible_block_num;
-			$headBlockNumber.innerHTML = properties.head_block_number;
-			$reverseBlocksCount.innerHTML = reverseBlockCount;
-		}
-	});
-	
-});
+let __last_block = 0;
+let __current_block = 0;
+
+sleep = (ms) => { return new Promise(resolve => setTimeout(resolve, ms)); };
+
+update_block = async (lastBlock) => {
+  const block = await steem.api.getBlockAsync(lastBlock);
+
+  if (block && workRealTime) {
+    let operations = {};
+    let operationsCount = 0;
+    block.transactions.forEach(function(transaction) {
+      transaction.operations.forEach(function(operation) {
+        if ( ! operations[operation[0]]) operations[operation[0]] = 0;
+        operations[operation[0]]++;
+        operationsCount++;
+      });
+    });
+    let operationsStr = '';
+    for (let key in operations) {
+      operationsStr += `<a class="btn btn-outline-info btn-sm" href="#operations/${lastBlock}/${key}">${key} <span class="badge badge-info">${operations[key]}</span></a> `;
+    }
+    let $newRow = $recentBlocksTableTbody.insertRow(0);
+    $newRow.className = 'table-new';
+    $newRow.innerHTML = `<tr>
+                <td><a href="#block/${lastBlock}">${lastBlock}</a></td>
+                <td>${block.timestamp}</td>
+                <td><a href="#account/${block.witness}">${block.witness}</a></td>
+                <td>${block.transactions.length}</td>
+                <td>${operationsCount}</td>
+              </tr>`;
+    $newRow.className = 'table-success';
+    $newRow.className = 'table-secondary';
+    let $newSubRow = $recentBlocksTableTbody.insertRow(1);
+    $newSubRow.className = 'table-new';
+    $newSubRow.innerHTML = `<tr>${operationsStr ? `<td colspan="5">${operationsStr}</td>` : ``}</tr>`;
+    $newSubRow.className = 'table-success';
+    $newSubRow.className = '';
+    autoClearRealTime();
+  }
+  // else if (err) console.error(err);
+};
+
+update_gprops = async () => {
+  const properties = await steem.api.getDynamicGlobalPropertiesAsync();
+  for (let key in properties) {
+    let prop = $globalPropertiesTableTbody.querySelector('b[data-prop="' + key + '"]');
+    if (prop) prop.innerHTML = properties[key];
+  }
+  let reverseBlockCount = properties.head_block_number - properties.last_irreversible_block_num;
+  $headBlockNumber.innerHTML = properties.head_block_number;
+  $reverseBlocksCount.innerHTML = reverseBlockCount;
+
+  //////////
+  __last_block = properties.head_block_number;
+};
+
+(async function init() {
+  console.log("init");
+
+  while (true) { // big loop
+    try {
+      if (__last_block <= 0) {
+        await update_gprops();
+      }
+
+      if (__current_block <= 0) {
+        __current_block = __last_block;
+      }
+
+      while (__current_block <= __last_block) {
+        await update_block(__current_block);
+        __current_block ++;
+
+        await sleep(1000);
+      }
+
+      await update_gprops();
+    } catch (e) {
+      console.log(e);
+    } finally {
+      await sleep(10000);
+    }
+  }
+})();
+
 
 if (localStorage && localStorage.clearAfterBlocksVal) $autoClearRealTimeAfter.value = localStorage.clearAfterBlocksVal;
 
@@ -182,7 +181,7 @@ let autoClearRealTime = function() {
 			trsCount -= 2;
 		}
 	}
-}
+};
 
 $autoClearRealTimeAfter.addEventListener('change', autoClearRealTime);
 
@@ -190,7 +189,7 @@ let getBlockFullInfo = function(blockNumberVal) {
 	$aboutBlockOperationsTableTbody.innerHTML = '';
 	$aboutBlockTransactionsTableTbody.innerHTML = '';
 	$aboutBlockCode.innerHTML = '';
-	golos.api.getBlock(blockNumberVal, function(err, block) {
+	steem.api.getBlock(blockNumberVal, function(err, block) {
 		loadingHide();
 		if (block) {
 			
@@ -298,7 +297,7 @@ document.getElementById('search-hex').addEventListener('submit', function(e) {
 	$aboutAccountPage.style.display = 'none';
 	$resetAccountBtn.style.display = 'none';
 	$recentBlocksInfo.style.display = 'none';
-	golos.api.getTransaction(hexNumberVal, function(err, result) {
+	steem.api.getTransaction(hexNumberVal, function(err, result) {
 		loadingHide();
 		if ( ! err) {
 			getBlockFullInfo(result.block_num);
@@ -334,7 +333,7 @@ let getAccountTransactions = function() {
 	let usernameVal = $searchAccount.querySelector('.form-control[name="account-username"]').value;
 	let operationsCount = 0;
 	$aboutAccountTableTbody.innerHTML = '';
-	golos.api.getAccountHistory(usernameVal, accountHistoryFrom, accountHistoryCount, function(err, transactions) {
+	steem.api.getAccountHistory(usernameVal, accountHistoryFrom, accountHistoryCount, function(err, transactions) {
 		loadingHide();
 		if (transactions.length > 0) {
 			//transactions.reverse();
@@ -422,7 +421,7 @@ let getBlockInfo = function(blockNumberVal, operationName, callback) {
 	$modalAboutBlockTransactionsTableTbody.innerHTML = '';
 	$modalAboutBlockCode.innerHTML = '';
 	$modalAboutBlockModalTitle.innerHTML = `About block #${blockNumberVal}, filtered ${operationName}`;
-	golos.api.getBlock(blockNumberVal, function(err, block) {
+	steem.api.getBlock(blockNumberVal, function(err, block) {
 		loadingHide();
 		if (block) {
 			let blockTransactionsArr = [];
