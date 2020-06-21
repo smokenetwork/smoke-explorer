@@ -43,7 +43,7 @@ let $modalAboutBlockCode = document.getElementById('modal-about-block-code');
 let $aboutAccountPagePrev = document.getElementById('about-account-page-prev');
 let $aboutAccountPageNext = document.getElementById('about-account-page-next');
 
-steem.api.setOptions({url: 'https://rpc.smoke.io'});
+steem.api.setOptions({url: 'https://pubrpc.smoke.io/'});
 steem.config.set('address_prefix', 'SMK');
 steem.config.set('chain_id', '1ce08345e61cd3bf91673a47fc507e7ed01550dab841fd9cdb0ab66ef576aaf0');
 
